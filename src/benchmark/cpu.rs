@@ -5,14 +5,18 @@ use std::io::Write;
 use std::io;
 
 pub fn single_start() {
-    //logovat do souboru misto vypisovat do konzole
-        // X    vytvorit slozku
-        //Zeptat se na log -> 
-            // zeptat se na jmeno
-        //ulozit log do slozky
     // ? zahrat cpu
     //
     // PROBLEM: cas se postupne prodluzuje i kdyz se pocita to same
+    //      vetsi memory usage over time 
+    //  IDEA : shadowing puts the value in a different adress
+    //      let x = 1;   x_01
+    //      let x = 4;   x_02
+    //         totalne jina adresa
+    //
+    // X SOLUTION 
+    //      no shadowing, muttable variables
+    //      different log system ( without it it is like 1999x faster)
     
     let mut log_content = String::new();
 
@@ -43,24 +47,32 @@ pub fn single_start() {
         .recursive(true)
         .create(&directory).unwrap();
 
-    let mut time_rec: [Duration; 10] = [Duration::new(0,0); 10];
+    let mut time_rec: [Duration; 5] = [Duration::new(0,0); 5];
     let mut run_count = 0;
+    let mut sys_time: SystemTime;
 
     let start_num: u128 = u128::pow(10,11);
-    let end_num: u128 = (u128::pow(10,11)) + 5000;
+    let end_num: u128 = (u128::pow(10,11)) + 1_000_000;
+
+    let mut a_matrix: [[u128; 10] ; 10];
+    let mut b_matrix: [[u128; 10] ; 10];
+    let mut result: [[u128; 10]; 10];
+
+    let mut matrix_num: u128;
+
+    let mut time_elapsed: Duration;
+
 
     println!("Started...Please wait");
     println!("The program will do math operations in a loop 5 times to get the average time");
-    log_content = format!("{log_content}\n############## The program will start doing matrix multiplication from numbers 10^11 to 10^11 + 5000, 5 times to get an average time ##############");
+    log_content = format!("{log_content}\n############## The program will start doing matrix multiplication from numbers 10^11 to 10^11 + 3000, 5 times to get an average time ##############");
 
     while run_count < 5 {
-        let sys_time = SystemTime::now();
+        sys_time = SystemTime::now();
         for x in start_num..end_num {
-            log_content = format!("{log_content}\n ########{} out of 10#######\n", run_count + 1);
-            log_content = format!("{log_content}\n#### Currenty at number: {x} out of 100_100_000####");
-            println!("\n#######{x} out of 1_000_0000#######");
+            println!("\n#######{x} out of {end_num}#######");
     
-            let a_matrix: [[u128; 10] ; 10] = [
+            a_matrix = [
                 [x,x,x,x,x,x,x,x,x,x],
                 [x,x,x,x,x,x,x,x,x,x],
                 [x,x,x,x,x,x,x,x,x,x],
@@ -72,12 +84,7 @@ pub fn single_start() {
                 [x,x,x,x,x,x,x,x,x,x],
                 [x,x,x,x,x,x,x,x,x,x],
             ];
-            log_content = format!("{log_content}\n");
-            for line in &a_matrix {
-                log_content = format!("{log_content}{line:?}\n");
-            };
-            log_content = format!("{log_content}\n");
-            let b_matrix: [[u128; 10] ; 10] = [
+            b_matrix = [
                 [x,x,x,x,x,x,x,x,x,x],
                 [x,x,x,x,x,x,x,x,x,x],
                 [x,x,x,x,x,x,x,x,x,x],
@@ -89,39 +96,25 @@ pub fn single_start() {
                 [x,x,x,x,x,x,x,x,x,x],
                 [x,x,x,x,x,x,x,x,x,x],
             ];
-            log_content = format!("{log_content}\n");
-            for line in &b_matrix {
-                log_content = format!("{log_content}{line:?}\n");
-            };
-            log_content = format!("{log_content}\n");
+            result = [[0; 10]; 10];
     
-            let mut result: [[u128; 10]; 10] = [[0; 10]; 10];
-    
-            let mut num: u128 = 0;
+            matrix_num = 0;
             for x in 0..a_matrix.len() {
                 for k in 0..b_matrix.len() {
                     for y in 0..a_matrix[x].len() {
-                        num += a_matrix[x][y] * b_matrix[y][k];
+                        matrix_num += a_matrix[x][y] * b_matrix[y][k];
                     };
-                    result[x][k] = num;
-                    num = 0;
+                    result[x][k] = matrix_num;
+                    matrix_num = 0;
                 }
             };
-            log_content = format!("{log_content}\n");
-            log_content = format!(" {log_content} ## ## ## ## ## ## ## ## ## ##\n");
-            for line in &result {
-                log_content = format!("{log_content}{line:?}\n");
-            };
-            log_content = format!(" {log_content} ## ## ## ## ## ## ## ## ## ##");
-            log_content = format!("{log_content}\n");
         };
 
-        let time = sys_time.elapsed().expect("Time error");
-        log_content = format!("{log_content}\n\n ##### loop time: {time:?} #####\n\n");
-        time_rec[run_count] = time;
+        time_elapsed = sys_time.elapsed().expect("Time error");
+        time_rec[run_count] = time_elapsed;
 
 
-        println!("\n\n ##### loop time: {time:?} #####\n\n");
+        println!("\n\n ##### loop time: {time_elapsed:?} #####\n\n");
 
 
 
@@ -132,8 +125,9 @@ pub fn single_start() {
     for time in time_rec {
         avg_time += time;
     };
-    let avg_time = avg_time / (time_rec.len()) as u32;
-    log_content = format!("{log_content}\n###### The average time is: {avg_time:?} ######");
+    avg_time = avg_time / (time_rec.len()) as u32;
+    log_content = format!("{log_content}\n\n###### The average time is: {avg_time:?} ######");
+    log_content = format!("{log_content}\nAll times: \n{time_rec:?}");
     println!("###### The average time is: {avg_time:?} ######");
 
     loop {
@@ -163,6 +157,7 @@ pub fn single_start() {
                 };
                 let log_content = log_content.as_bytes();
                 let _ = log_file.write_all(log_content);
+                println!("File saved");
                 break
             },
             "n" => break,
