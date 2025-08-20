@@ -3,7 +3,8 @@ use benchmark::cpu;
 mod benchmark;
 
 fn main() {
-    println!("1 - CPU, 2 - RAM, 3 - disk");
+    loop {
+    println!("\n1 - CPU, 2 - RAM, 3 - disk");
     let mut operation = String::new();
     if let Err(err) = io::stdin().read_line(&mut operation) {
         println!("{err}");
@@ -11,8 +12,8 @@ fn main() {
     let operation = match operation.trim().parse::<u8>() {
         Ok(num) => num,
         Err(err) => {
-            println!("{err}");
-            panic!();
+            println!("\n{err}: Please select a valid option");
+            continue;
         },
     };
 
@@ -22,6 +23,11 @@ fn main() {
         }, 2 => {
         }, 3 => {
         }, _ => {
+            println!("\nPlease select a valid option");
+            continue;
         }
     };
+    break;
+    };
+
 }
